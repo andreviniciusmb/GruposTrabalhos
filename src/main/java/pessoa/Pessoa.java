@@ -14,13 +14,10 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -40,8 +37,33 @@ import telefone.Telefone;
     @NamedQuery(
             name = "Pessoa.findNome",
             query = "SELECT p.nome FROM Pessoa p"),
-}
-)
+    @NamedQuery(
+            name = "Pessoa.findNomeEndereco",
+            query = "SELECT p.nome,p.endereco FROM Pessoa p"),
+    @NamedQuery(
+            name = "Pessoa.findPessoasAvenida",
+            query = "SELECT p FROM Pessoa p WHERE p.endereco.tipoLogradouro = 1"),
+    @NamedQuery(
+            name = "Pessoa.findPessoasPraca",
+            query = "SELECT p FROM Pessoa p WHERE p.endereco.tipoLogradouro != 2"),
+    @NamedQuery(
+            name = "Pessoa.findNomeTelefone",
+            query = "SELECT p.nome, fones FROM Pessoa p, IN(p.lst_telefones) fones"),
+    @NamedQuery(
+            name = "findPessoasPR",
+            query = "SELECT p FROM Pessoa p"),  //TODO Fazer consulta 8.a
+    @NamedQuery(
+            name = "findPessoasRJ",
+            query = "SELECT p FROM Pessoa p"),  //TODO Fazer consulta 8.b
+    @NamedQuery(
+            name = "Pessoa.findPessoasNaoTelefone",
+            query = "SELECT p FROM Pessoa p WHERE LENGTH(p.lst_telefones) = 0"),
+    @NamedQuery(
+            name = "Pessoa.findTelefonePorPessoa",
+            query = "SELECT p, COUNT(p.id) FROM Pessoa p, IN(p.lst_telefones) fones GROUP BY p.id")
+    
+})
+
 public class Pessoa implements Serializable{
     
     @Id
@@ -61,19 +83,23 @@ public class Pessoa implements Serializable{
     private Integer idade;
     
     @OneToMany(mappedBy="pessoa",
-            cascade = CascadeType.ALL)
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
     //@JoinColumn(name = "pessoa_id")
     private List<Atuacao> lst_atuacoes;
     
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL,
+            orphanRemoval = true)
     private Endereco endereco;
     
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL,
+            orphanRemoval = true)
     @JoinColumn(name = "pessoa_id")
     private List<Telefone> lst_telefones;
     
     @OneToMany(mappedBy = "lider",
-            cascade = CascadeType.ALL)
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
     private List<Grupo> lst_grupos;
 
     //<editor-fold defaultstate="collapsed" desc="Constructors">
